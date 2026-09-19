@@ -9,8 +9,8 @@ all:
         rupert-arm-00:
           ansible_host: 192.168.1.245
           ansible_user: rupert
-          mac: 2c:cf:67:7d:9b:71
+          mac: d8:3a:dd:f0:0c:95
         rupert-arm-01:
           ansible_host: 192.168.1.246
           ansible_user: rupert
-          mac: d8:3a:dd:f0:0c:95
+          mac: 2c:cf:67:7d:9b:71
