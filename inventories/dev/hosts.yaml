@@ -2,7 +2,7 @@ all:
   children:
     rupert:
       hosts:
-        rupert-dev01:
+        rupert-dev-00:
           ansible_host: 192.168.1.230
           ansible_user: rupert
           mac: d8:3a:dd:f0:17:d4
