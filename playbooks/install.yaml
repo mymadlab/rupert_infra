@@ -1,0 +1,13 @@
+- name: Install the whole environment
+  hosts: core:rap:rds
+  tasks:
+    - import_tasks: tasks/install/common.yaml
+    - include_tasks: tasks/install/kafka.yaml
+      when: inventory_hostname in groups['core']
+    - include_tasks: tasks/install/nginx-unit.yaml
+      when: inventory_hostname in groups['core']
+    - include_tasks: tasks/install/rupert-venv.yaml
+    - include_tasks: tasks/install/rap.yaml
+      when: inventory_hostname in groups['rap']
+    - include_tasks: tasks/install/rds.yaml
+      when: inventory_hostname in groups['rds']

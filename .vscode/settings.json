@@ -1,0 +1,26 @@
+{
+	"python.defaultInterpreterPath": "/Users/bk/wb/py/rupert-infra/bin/python",
+	"python.terminal.activateEnvironment": false,
+	"terminal.integrated.env.osx": {
+		"VIRTUAL_ENV": "/Users/bk/wb/py/rupert-infra",
+		"PATH": "/Users/bk/wb/py/rupert-infra/bin:${env:PATH}"
+	},
+		"terminal.integrated.profiles.osx": {
+			"fish (rupert-dev)": {
+				"path": "fish",
+				"args": [
+					"-l",
+					"-C",
+					"source /Users/bk/wb/py/rupert-dev/bin/activate.fish"
+				]
+			}
+		},
+	"terminal.integrated.defaultProfile.osx": "fish (rupert-infra venv)",
+	"python-envs.pythonProjects": [
+		{
+			"path": ".",
+			"envManager": "ms-python.python:venv",
+			"packageManager": "ms-python.python:pip"
+		}
+	]
+}

@@ -1,0 +1,73 @@
+# Tasks required for Rupert Virtual Environment (rupert_venv)
+- name: Install rupert python dependencies in a virtual environment
+  ansible.builtin.pip:
+    name:
+      - "beartype~={{ beartype_version }}"
+      - "confluent_kafka~={{ confluent_kafka_version }}"
+      - "flask[async]~={{ flask_version }}"
+      - "loguru~={{ loguru_version }}"
+    virtualenv: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}"
+    virtualenv_command: /usr/bin/python3 -m venv
+- name: Create a link to the rupert venv
+  ansible.builtin.file:
+    src: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}"
+    dest: "{{ app_directory }}/rupert_venv"
+    state: link
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Create Rupert Prosumer source directory
+  ansible.builtin.file:
+    path: "{{ install_directory }}/rupert_prosumer_{{ rupert_prosumer_branch | default('main') }}_src"
+    state: directory
+- name: Download Rupert Prosumer branch archive
+  ansible.builtin.get_url:
+    url: "https://github.com/mymadlab/rupert_prosumer/archive/refs/heads/{{ rupert_prosumer_branch | default('main') }}.tar.gz"
+    dest: "{{ install_directory }}/rupert_prosumer-{{ rupert_prosumer_branch | default('main') | replace('/', '-') }}.tar.gz"
+    mode: '0644'
+  when: not ansible_check_mode # Check will fail if ~/install_rupert does not already exist
+- name: Extract Rupert Prosumer branch archive
+  ansible.builtin.unarchive:
+    src: "{{ install_directory }}/rupert_prosumer-{{ rupert_prosumer_branch | default('main') | replace('/', '-') }}.tar.gz"
+    dest: "{{ install_directory }}/rupert_prosumer_{{ rupert_prosumer_branch | default('main') }}_src"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+  when: not ansible_check_mode # Check will fail if ~/install_rupert does not already exist
+- name: Ensure Rupert venv exists
+  ansible.builtin.command:
+    cmd: /usr/bin/python3 -m venv "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}"
+  args:
+    creates: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}/bin/python"
+- name: Ensure Rupert Prosumer site-packages directory exists
+  ansible.builtin.file:
+    path: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}/lib/python3.12/site-packages/rupert_prosumer"
+    state: directory
+- name: Install Rupert Prosumer into Rupert venv
+  ansible.builtin.copy:
+    src: "{{ install_directory }}/rupert_prosumer_{{ rupert_prosumer_branch | default('main') }}_src/"
+    dest: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}/lib/python3.12/site-packages/rupert_prosumer/"
+    remote_src: true
+  when: not ansible_check_mode # Check will fail if ~/install_rupert does not already exist
+- name: Make init_topics.py executable
+  ansible.builtin.file:
+    path: "{{ app_directory }}/rupert_venv/lib/python3.12/site-packages/rupert_prosumer/init_topics.py"
+    mode: '0755'
+    state: file
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Make drain_kafka_topic.py executable
+  ansible.builtin.file:
+    path: "{{ app_directory }}/rupert_venv/lib/python3.12/site-packages/rupert_prosumer/drain_kafka_topic.py"
+    mode: '0755'
+    state: file
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Create a link to prosumer init_topics.py
+  ansible.builtin.file:
+    src: "{{ app_directory }}/rupert_venv/lib/python3.12/site-packages/rupert_prosumer/init_topics.py"
+    dest: "{{ app_directory }}/bin/init_topics.py"
+    state: link
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Create a link to rupert drain kafka script
+  ansible.builtin.file:
+    src: "{{ app_directory }}/rupert_venv/lib/python3.12/site-packages/rupert_prosumer/drain_kafka_topic.py"
+    dest: "{{ app_directory }}/bin/drain_kafka_topic.py"
+    state: link
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed

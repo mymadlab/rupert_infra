@@ -1,0 +1,51 @@
+---
+# System
+timezone: UTC
+common_packages: []
+
+# General
+user_home_directory: "{{ ansible_facts['user_dir'] | default('/home/' ~ ansible_facts['user_id']) }}"
+app_directory: "{{ user_home_directory }}/app"
+install_directory: "{{ user_home_directory }}/install_rupert"
+deploy: present
+
+# Kafka
+kafka_checksum: sha512:16ce46e590ba915f01b720ea514445e49c88bf129cf4ceab88878b122d54ef24f0dedb88d0eb178957f58057a6c6a9adbea8b8059307585daea13129b85ba1d8
+kafka_scala_version: 2.13
+kafka_version: 4.2.0
+
+# Logging
+logging_directory: "{{ app_directory }}/log"
+logging_rotation: 10 MB
+logging_retention: 7 days
+logging_level: INFO
+
+# NGINX Unit Rupert Flask app
+nginx_unit_web_directory: "{{ user_home_directory }}/app/web"
+rupert_actions_directory: "{{ user_home_directory }}/app/actions"
+
+# Python venv
+## All
+rupert_venv_version: 0.0.1
+beartype_version: 0.22.0
+confluent_kafka_version: 2.14.0
+flask_version: 3.1.0
+loguru_version: 0.7.0
+
+## Rupert Audio Player
+python_vlc_version: 3.0.0
+
+## Rupert Device Services
+tinytuya_version: 1.17.0
+
+## TinyTuya config
+tinytuya_api_region: us
+tinytuya_apidevice_id: scan
+
+# Unity
+unit_repo_url: https://packages.nginx.org/unit/ubuntu/
+unit_repo_key_url: https://unit.nginx.org/keys/nginx-keyring.gpg
+unit_repo_keyring_path: /usr/share/keyrings/nginx-keyring.gpg
+unit_packages:
+  - unit
+  - unit-python3.12

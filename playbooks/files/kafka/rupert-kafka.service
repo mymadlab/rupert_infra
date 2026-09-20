@@ -1,0 +1,16 @@
+[Unit]
+Description=Rupert Kafka Instance
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/rupert/app/bin
+ExecStart=/home/rupert/app/bin/kafka-control.sh start
+Type=simple
+Restart=on-failure
+SuccessExitStatus=143 SIGTERM
+User=rupert
+ExecStop=/home/rupert/app/bin/kafka-control.sh stop
+
+[Install]
+WantedBy=multi-user.target

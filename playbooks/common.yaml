@@ -1,0 +1,7 @@
+- name: Install common dependencies for all playbooks
+  hosts: core
+  tasks:
+    - import_tasks: tasks/install/common.yaml
+      when: deploy == 'present'
+    - import_tasks: tasks/uninstall/common.yaml
+      when: deploy == 'absent'

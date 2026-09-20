@@ -1,0 +1,7 @@
+- name: Deploy Rupert Virtual Environment
+  hosts: core:rap:rds
+  tasks:
+    - import_tasks: tasks/install/rupert-venv.yaml
+      when: deploy == 'present'
+    - import_tasks: tasks/uninstall/rupert-venv.yaml
+      when: deploy == 'absent'

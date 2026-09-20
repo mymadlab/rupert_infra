@@ -1,0 +1,18 @@
+{
+  "kafka": {
+    "connection": {
+      "bootstrap.servers": "{{ kafka_bootstrap_servers }}"
+    },
+    "topics": {{ kafka_topics | to_nice_json(indent=2) | indent(4, true) }},
+    "consumer": {
+      "group.id": "{{ kafka_consumer_group_id }}",
+      "auto.offset.reset": "{{ kafka_auto_offset_reset }}"
+    }
+  },
+  "logging": {
+    "log_directory": "{{ logging_directory }}",
+    "rotation": "{{ logging_rotation }}",
+    "retention": "{{ logging_retention }}",
+    "level": "{{ logging_level }}"
+  }
+}

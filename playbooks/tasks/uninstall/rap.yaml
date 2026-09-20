@@ -1,0 +1,8 @@
+# Tasks required for uninstalling Rupert Audio Player (RAP)
+- name: Uninstall Rupert Audio Player python dependencies
+  ansible.builtin.pip:
+    name:
+      - "python-vlc=={{ python_vlc_version }}"
+    virtualenv: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}"
+    virtualenv_command: /usr/bin/python3 -m venv
+    state: absent

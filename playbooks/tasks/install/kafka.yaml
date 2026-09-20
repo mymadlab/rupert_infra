@@ -1,0 +1,62 @@
+# Install Kafka
+- name: Update apt cache if stale
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+- name: Install openJDK 21 for Kafka
+  ansible.builtin.apt:
+    name: openjdk-21-jre-headless
+    state: present
+    update_cache: false
+  become: true
+- name: Download Kafka tarball
+  ansible.builtin.get_url:
+    url: "https://dlcdn.apache.org/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    dest: "{{ install_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    checksum: "{{ kafka_checksum }}"
+  when: not ansible_check_mode # Check will fail if ~/install_rupert does not already exist
+- name: Extract Kafka
+  ansible.builtin.unarchive:
+    src: "{{ install_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    dest: "{{ install_directory }}/"
+    remote_src: true
+  when: not ansible_check_mode # Check will fail if ~/install_rupert does not already exist
+- name: Copy Kafka Directory to app
+  ansible.builtin.copy:
+    src: "{{ install_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}/"
+    dest: "{{ app_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}"
+    remote_src: true
+    force: false
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Create a link to the Kafka directory in app
+  ansible.builtin.file:
+    src: "{{ app_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}"
+    dest: "{{ app_directory }}/kafka"
+    state: link
+  when: not ansible_check_mode # Check will fail if Kafka has not already been installed
+- name: Copy kafka control script to app/bin
+  ansible.builtin.copy:
+    src: files/kafka/kafka-control.sh
+    dest: "{{ app_directory }}/bin/kafka-control.sh"
+    mode: '0755'
+- name: Copy kafka systemd service file
+  ansible.builtin.copy:
+    src: files/kafka/rupert-kafka.service
+    dest: /etc/systemd/system/
+  become: true
+- name: Update Kafka advertised.listeners in 
+  ansible.builtin.lineinfile:
+    path: "{{ app_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}/config/server.properties"
+    regexp: '^advertised.listeners=PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093$'
+    line: 'advertised.listeners=PLAINTEXT://{{ ansible_facts.default_ipv4.address }}:9092,CONTROLLER://{{ ansible_facts.default_ipv4.address }}:9093'
+- name: Enable kafka service
+  ansible.builtin.service:
+    name: rupert-kafka
+    enabled: yes
+    state: started
+    daemon_reload: true
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+  async: 60
+  poll: 5
+  become: true

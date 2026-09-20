@@ -1,0 +1,11 @@
+# Create a python virtual environment for ansible development and deployment.
+# pypyr venv-dev path_to_new_venv
+context_parser: pypyr.parser.string
+steps:
+  - name: pypyr.steps.venv
+    in:
+      venv:
+        path: "{argString}"
+        pip: ansible
+        clear: true
+        prompt: ri-dev

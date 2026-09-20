@@ -1,0 +1,15 @@
+- name: Deploy core services
+  hosts: core
+  tasks:
+    - import_tasks: tasks/install/kafka.yaml
+      when: deploy == 'present'
+    - import_tasks: tasks/install/nginx-unit.yaml
+      when: deploy == 'present'
+    - import_tasks: tasks/install/rupert-venv.yaml
+      when: deploy == 'present'
+    - import_tasks: tasks/uninstall/kafka.yaml
+      when: deploy == 'absent'
+    - import_tasks: tasks/uninstall/nginx-unit.yaml
+      when: deploy == 'absent'
+    - import_tasks: tasks/uninstall/rupert-venv.yaml
+      when: deploy == 'absent'

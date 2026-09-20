@@ -1,0 +1,12 @@
+# Tasks required for Rupert Device Services (RDS)
+- name: Install Rupert Device Services python dependencies
+  ansible.builtin.pip:
+    name:
+      - "tinytuya~={{ tinytuya_version }}"
+    virtualenv: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}"
+    virtualenv_command: /usr/bin/python3 -m venv
+- name: Copy TinyTuya config file to app directory
+  ansible.builtin.template:
+    src: templates/tinytuya.json.j2
+    dest: "{{ app_directory }}/cfg/tinytuya.json"
+    mode: '0600'

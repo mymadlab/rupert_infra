@@ -1,0 +1,114 @@
+# Tasks required for NGINX Unit
+- name: Install APT prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+    update_cache: true
+  become: true
+- name: Download NGINX Unit signing key
+  ansible.builtin.get_url:
+    url: "{{ unit_repo_key_url }}"
+    dest: "{{ unit_repo_keyring_path }}"
+    mode: '0644'
+  become: true
+- name: Add NGINX Unit APT repository
+  ansible.builtin.deb822_repository:
+    name: nginx-unit
+    types:
+      - deb
+    uris:
+      - "{{ unit_repo_url }}"
+    suites:
+      - "{{ ansible_facts['distribution_release'] }}"
+    components:
+      - unit
+    signed_by: "{{ unit_repo_keyring_path }}"
+    state: present
+  become: true
+- name: Install NGINX Unit packages
+  ansible.builtin.apt:
+    name: "{{ unit_packages }}"
+    state: present
+    update_cache: true
+  become: true
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Add unit user to rupert group
+  ansible.builtin.user:
+    name: unit
+    groups: rupert
+    append: true
+  become: true
+  when: not ansible_check_mode # Check will fail till the unit user is created by installing unit package
+- name: Add Rupert environment variables to unit.service
+  ansible.builtin.blockinfile:
+    path: /usr/lib/systemd/system/unit.service
+    marker: "# {mark} ANSIBLE MANAGED BLOCK RUPERT ENV"
+    insertafter: '^\[Service\]'
+    block: |
+      Environment="RUPERT_ACTIONS_DIR={{ rupert_actions_directory }}"
+      Environment="RUPERT_CONFIG_JSON={{ app_directory }}/cfg/rupert_config.json"
+  become: true
+  when: not ansible_check_mode # Check will fail if unit package has not already been deployed
+- name: Add Rupert environment variables to unit-debug.service
+  ansible.builtin.blockinfile:
+    path: /usr/lib/systemd/system/unit-debug.service
+    marker: "# {mark} ANSIBLE MANAGED BLOCK RUPERT ENV"
+    insertafter: '^\[Service\]'
+    block: |
+      Environment="RUPERT_ACTIONS_DIR={{ rupert_actions_directory }}"
+      Environment="RUPERT_CONFIG_JSON={{ app_directory }}/cfg/rupert_config.json"
+  become: true
+  when: not ansible_check_mode # Check will fail if unit package has not already been deployed
+- name: Reload systemd daemon after Unit service updates
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  when: not ansible_check_mode # Check will fail if unit package has not already been deployed
+- name: Enable and start NGINX Unit service
+  ansible.builtin.systemd:
+    name: unit
+    enabled: true
+    state: started
+  become: true
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Create a web directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ app_directory }}/web"
+    state: directory
+- name: Create the actions directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ app_directory }}/actions"
+    state: directory
+- name: Download Rupert Flask file for selected branch
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/mymadlab/rupert_flask/refs/heads/{{ flask_branch }}/rupert_flask.py"
+    dest: "{{ install_directory }}/rupert_flask.py"
+    mode: '0644'
+- name: Copy Rupert Flask file into web directory
+  ansible.builtin.copy:
+    src: "{{ install_directory }}/rupert_flask.py"
+    dest: "{{ app_directory }}/web/rupert_flask.py"
+    mode: '0755'
+    remote_src: true
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
+- name: Rupert Flask configuration for NGINX Unit
+  ansible.builtin.template:
+    src: templates/rupert_flask.json.j2
+    dest: "{{ install_directory }}/rupert_flask.json"
+    mode: '0600'
+- name: Apply Rupert Flask configuration to NGINX Unit
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -X
+      - PUT
+      - --data-binary
+      - "@{{ install_directory }}/rupert_flask.json"
+      - --unix-socket
+      - /var/run/control.unit.sock
+      - http://localhost/config/
+  become: true
+  when: not ansible_check_mode # Check will fail if Rupert venv has not already been deployed
