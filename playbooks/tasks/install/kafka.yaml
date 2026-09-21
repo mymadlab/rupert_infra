@@ -12,7 +12,7 @@
   become: true
 - name: Download Kafka tarball
   ansible.builtin.get_url:
-    url: "https://dlcdn.apache.org/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    url: "https://archive.apache.org/dist/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
     dest: "{{ install_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
     checksum: "{{ kafka_checksum }}"
   when: not ansible_check_mode # Check will fail if ~/install_rupert does not already exist
@@ -50,6 +50,7 @@
     path: "{{ app_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}/config/server.properties"
     regexp: '^advertised.listeners=PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093$'
     line: 'advertised.listeners=PLAINTEXT://{{ ansible_facts.default_ipv4.address }}:9092,CONTROLLER://{{ ansible_facts.default_ipv4.address }}:9093'
+  when: not ansible_check_mode # Check will fail if Kafka has not already been installed
 - name: Enable kafka service
   ansible.builtin.service:
     name: rupert-kafka

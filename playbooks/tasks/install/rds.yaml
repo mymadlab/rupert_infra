@@ -10,3 +10,4 @@
     src: templates/tinytuya.json.j2
     dest: "{{ app_directory }}/cfg/tinytuya.json"
     mode: '0600'
+  when: not ansible_check_mode
