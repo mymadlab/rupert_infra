@@ -1,0 +1,10 @@
+# Tasks required for uninstalling Rupert Virtual Environment (rupert_venv)
+- name: Delete the link to the rupert venv
+  ansible.builtin.file:
+    path: "{{ app_directory }}/rupert_venv"
+    state: absent
+- name: Delete the rupert venv
+  ansible.builtin.file:
+    path: "{{ app_directory }}/rupert_venv-{{ rupert_venv_version }}"
+    state: absent
+  

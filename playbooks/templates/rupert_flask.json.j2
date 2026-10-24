@@ -1,0 +1,17 @@
+{
+	"listeners": {
+		"*:80": {
+			"pass": "applications/rupert"
+		}
+	},
+
+	"applications": {
+		"rupert": {
+			"type": "python 3.12",
+			"path": "{{ nginx_unit_web_directory }}",
+			"home": "{{ app_directory }}/rupert_venv",
+			"module": "rupert_flask",
+			"callable": "app"
+		}
+	}
+}

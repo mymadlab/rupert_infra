@@ -1,0 +1,19 @@
+[Unit]
+Description=Rupert Audio Player Service
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+WorkingDirectory={{ app_directory }}/bin
+Environment="RAP_TOPIC={{ rap_topic_name }}"
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
+ExecStart={{ app_directory }}/bin/rap-control.sh start
+Type=simple
+Restart=on-failure
+SuccessExitStatus=143 SIGTERM
+User=rupert
+Group=rupert
+ExecStop={{ app_directory }}/bin/rap-control.sh stop
+
+[Install]
+WantedBy=multi-user.target

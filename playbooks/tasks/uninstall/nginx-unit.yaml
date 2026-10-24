@@ -1,0 +1,42 @@
+# Tasks required for uninstalling NGINX Unit
+- name: Delete the web directory
+  ansible.builtin.file:
+    path: "{{ app_directory }}/web"
+    state: absent
+- name: Remove NGINX Unit service
+  ansible.builtin.systemd:
+    name: unit
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+- name: Remove unit user from rupert group
+  ansible.builtin.user:
+    name: unit
+    groups: rupert
+    state: absent
+  become: true
+- name: Uninstall NGINX Unit packages
+  ansible.builtin.apt:
+    name: "{{ unit_packages }}"
+    state: absent
+  become: true
+- name: Remove NGINX Unit APT repository
+  ansible.builtin.deb822_repository:
+    name: nginx-unit
+    types:
+      - deb
+    uris:
+      - "{{ unit_repo_url }}"
+    suites:
+      - "{{ ansible_facts['distribution_release'] }}"
+    components:
+      - unit
+    signed_by: "{{ unit_repo_keyring_path }}"
+    state: absent
+  become: true
+- name: Remove NGINX Unit signing key
+  ansible.builtin.file:
+    path: "{{ unit_repo_keyring_path }}"
+    state: absent
+  become: true

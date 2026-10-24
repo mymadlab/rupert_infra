@@ -1,0 +1,37 @@
+# Uninstall Kafka
+- name: Remove kafka service
+  ansible.builtin.service:
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+- name: Delete kafka systemd service file
+  ansible.builtin.file:
+    path: /etc/systemd/system/rupert-kafka.service
+    state: absent
+  become: true
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+- name: Remove kafka control script from app/bin
+  ansible.builtin.file:
+    path: "{{ app_directory }}/bin/kafka-control.sh"
+    state: absent
+  become: true
+- name: Remove link to the Kafka directory in app
+  ansible.builtin.file:
+    path: "{{ app_directory }}/kafka"
+    state: absent
+- name: Delete Kafka Directory from app
+  ansible.builtin.file:
+    path: "{{ app_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}"
+    state: absent
+- name: Delete Kafka extract
+  ansible.builtin.file:
+    path: "{{ install_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    state: absent
+- name: Delete Kafka tarball
+  ansible.builtin.file:
+    path: "{{ install_directory }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    state: absent

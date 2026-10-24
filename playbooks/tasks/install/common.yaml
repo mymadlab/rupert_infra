@@ -1,0 +1,48 @@
+# Common requirements for all playbooks
+- name: Update apt cache if stale
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+- name: Upgrade all packages to their latest version
+  ansible.builtin.apt:
+    upgrade: dist
+    update_cache: false
+  become: true
+- name: Install Python3.12
+  ansible.builtin.apt:
+    name: python3.12
+    state: present
+    update_cache: false
+  become: true
+- name: Install Python3.12 venv
+  ansible.builtin.apt:
+    name: python3.12-venv
+    state: present
+    update_cache: false
+  become: true
+- name: Create install directory
+  ansible.builtin.file:
+    path: "{{ install_directory }}"
+    state: directory
+- name: Create app directory if it does exist
+  ansible.builtin.file:
+    path: "{{ app_directory }}"
+    state: directory
+- name: Create app/bin directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ app_directory }}/bin"
+    state: directory
+- name: Create app/cfg directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ app_directory }}/cfg"
+    state: directory
+- name: Create app/log directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ app_directory }}/log"
+    state: directory
+- name: Rupert config file to app directory
+  ansible.builtin.template:
+    src: templates/rupert_config.json.j2
+    dest: "{{ app_directory }}/cfg/rupert_config.json"
+    mode: '0660'

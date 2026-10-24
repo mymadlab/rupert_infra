@@ -1,0 +1,7 @@
+- name: Deploy Rupert Virtual Environment
+  hosts: rds
+  tasks:
+    - include_tasks: tasks/install/rds.yaml
+      when: deploy == 'present'
+    - include_tasks: tasks/uninstall/rds.yaml
+      when: deploy == 'absent'

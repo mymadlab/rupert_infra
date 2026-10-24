@@ -1,0 +1,7 @@
+- name: Install Kafka
+  hosts: core
+  tasks:
+    - import_tasks: tasks/install/kafka.yaml
+      when: deploy == 'present'
+    - import_tasks: tasks/uninstall/kafka.yaml
+      when: deploy == 'absent'

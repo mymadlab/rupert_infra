@@ -1,0 +1,7 @@
+- name: Install NGINX Unit on Ubuntu 24.04
+  hosts: core
+  tasks:
+      - import_tasks: tasks/install/nginx-unit.yaml
+        when: deploy == 'present'
+      - import_tasks: tasks/uninstall/nginx-unit.yaml
+        when: deploy == 'absent'

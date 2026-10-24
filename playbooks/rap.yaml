@@ -1,0 +1,7 @@
+- name: Deploy Rupert Audio Player
+  hosts: rap
+  tasks:
+    - import_tasks: tasks/install/rap.yaml
+      when: deploy == 'present'
+    - import_tasks: tasks/uninstall/rap.yaml
+      when: deploy == 'absent'
