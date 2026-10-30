@@ -17,6 +17,7 @@ kafka_topics:
   audio_loft: audio.loft
   audio_master: audio.master
   audio_mateo: audio.mateo
+  audio_garage: audio.garage
   devices_all: devices.all
 kafka_consumer_group_id: rupert
 kafka_auto_offset_reset: smallest
